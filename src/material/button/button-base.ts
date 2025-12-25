@@ -20,6 +20,8 @@ import {
   numberAttribute,
   OnDestroy,
   Renderer2,
+  contentChild,
+  afterRenderEffect,
 } from '@angular/core';
 import {_animationsDisabled, _StructuralStylesLoader, MatRippleLoader, ThemePalette} from '../core';
 import {_CdkPrivateStyleLoader} from '@angular/cdk/private';
@@ -157,6 +159,9 @@ export class MatButtonBase implements AfterViewInit, OnDestroy {
   /** Whether the button is showing a progress indicator. */
   readonly showProgress = input(false, {transform: booleanAttribute});
 
+  private readonly progressIndicatorElementRef =
+    contentChild<ElementRef<HTMLElement>>('[progressIndicator]');
+
   constructor(...args: unknown[]);
 
   constructor() {
@@ -167,6 +172,16 @@ export class MatButtonBase implements AfterViewInit, OnDestroy {
     this.disabledInteractive = this._config?.disabledInteractive ?? false;
     this.color = this._config?.color ?? null;
     this._rippleLoader?.configureRipple(element, {className: 'mat-mdc-button-ripple'});
+
+    // Ensure that the loading indicator is not in a focus order, otherwise we end up with
+    // an interactable element inside the interactable button.
+    afterRenderEffect(() => {
+      const element = this.progressIndicatorElementRef()?.nativeElement;
+      if (!element) {
+        return;
+      }
+      this._renderer.setAttribute(element, 'tabindex', '');
+    });
   }
 
   ngAfterViewInit() {

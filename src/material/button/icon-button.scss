@@ -68,7 +68,7 @@ $fallbacks: m3-icon-button.get-tokens();
     color: token-utils.slot(icon-button-disabled-icon-color, $fallbacks);
   }
   img,
-  svg {
+  svg:not(.mat-mdc-button-progress-indicator-container *) {
     width: token-utils.slot(icon-button-icon-size, $fallbacks);
     height: token-utils.slot(icon-button-icon-size, $fallbacks);
     vertical-align: baseline;
@@ -99,7 +99,7 @@ $fallbacks: m3-icon-button.get-tokens();
 .mat-mdc-button-progress-indicator-container {
   position: absolute;
   inset-inline-start: 0;
-  margin-block-start: 0;
+  inset-block-start: 0;
   display: flex;
   align-items: center;
   justify-content: center;
