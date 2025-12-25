@@ -4,6 +4,7 @@
 @use '../core/tokens/token-utils';
 @use '../core/focus-indicators/private' as focus-indicators-private;
 @use './m3-button';
+@use '../progress-spinner/progress-spinner-theme';
 
 $fallbacks: m3-button.get-tokens();
 
@@ -158,6 +159,17 @@ $fallbacks: m3-button.get-tokens();
     border-radius: token-utils.slot(button-filled-container-shape, $fallbacks);
   }
 
+  .mat-mdc-button-progress-indicator-container {
+    @include progress-spinner-theme.overrides(
+      (
+        active-indicator-color: token-utils.slot(
+            button-filled-progress-active-indicator-color,
+            $fallbacks
+          ),
+      )
+    );
+  }
+
   // We need to re-apply the disabled tokens since MDC uses
   // `:disabled` which doesn't apply to anchors.
   @include button-base.mat-private-button-disabled {
@@ -236,10 +248,6 @@ $fallbacks: m3-button.get-tokens();
         $fallbacks
       );
     }
-  }
-
-  .mat-mdc-button-progress-indicator-container {
-    // Open question: how do we handle the progress indicator color for raised buttons?
   }
 }
 
