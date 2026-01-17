@@ -14,11 +14,14 @@ import {
   ElementRef,
   inject,
   InjectionToken,
+  input,
   Input,
   NgZone,
   numberAttribute,
   OnDestroy,
   Renderer2,
+  contentChild,
+  afterRenderEffect,
 } from '@angular/core';
 import {_animationsDisabled, _StructuralStylesLoader, MatRippleLoader, ThemePalette} from '../core';
 import {_CdkPrivateStyleLoader} from '@angular/cdk/private';
@@ -55,6 +58,7 @@ function transformTabIndex(value: unknown): number | undefined {
     // wants to target all Material buttons.
     'class': 'mat-mdc-button-base',
     '[class]': 'color ? "mat-" + color : ""',
+    '[class.mat-mdc-button-progress-indicator-shown]': 'showProgress()',
     '[attr.disabled]': '_getDisabledAttribute()',
     '[attr.aria-disabled]': '_getAriaDisabled()',
     '[attr.tabindex]': '_getTabIndex()',
@@ -150,6 +154,14 @@ export class MatButtonBase implements AfterViewInit, OnDestroy {
     this.tabIndex = value;
   }
 
+  // Open question: should this be in ButtonBase or in the individual components? button.html is
+  // used by several things
+  /** Whether the button is showing a progress indicator. */
+  readonly showProgress = input(false, {transform: booleanAttribute});
+
+  private readonly progressIndicatorElementRef =
+    contentChild<ElementRef<HTMLElement>>('[progressIndicator]');
+
   constructor(...args: unknown[]);
 
   constructor() {
@@ -160,6 +172,16 @@ export class MatButtonBase implements AfterViewInit, OnDestroy {
     this.disabledInteractive = this._config?.disabledInteractive ?? false;
     this.color = this._config?.color ?? null;
     this._rippleLoader?.configureRipple(element, {className: 'mat-mdc-button-ripple'});
+
+    // Ensure that the loading indicator is not in a focus order, otherwise we end up with
+    // an interactable element inside the interactable button.
+    afterRenderEffect(() => {
+      const element = this.progressIndicatorElementRef()?.nativeElement;
+      if (!element) {
+        return;
+      }
+      this._renderer.setAttribute(element, 'tabindex', '');
+    });
   }
 
   ngAfterViewInit() {
